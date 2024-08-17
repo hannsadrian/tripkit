@@ -33,8 +33,10 @@ public class Departure: NSObject, NSSecureCoding {
     /// URL for querying the wagon sequence of a train.
     /// See `DbProvider.getWagonSequenceUrl()`
     public let wagonSequenceContext: URL?
+    /// Occupancy of the vehicle
+    public let loadFactor: LoadFactor?
     
-    public init(plannedTime: Date, predictedTime: Date?, line: Line, position: String?, plannedPosition: String?, cancelled: Bool, destination: Location?, capacity: [Int]?, message: String?, journeyContext: QueryJourneyDetailContext?, wagonSequenceContext: URL? = nil) {
+    public init(plannedTime: Date, predictedTime: Date?, line: Line, position: String?, plannedPosition: String?, cancelled: Bool, destination: Location?, capacity: [Int]?, message: String?, journeyContext: QueryJourneyDetailContext?, wagonSequenceContext: URL? = nil, loadFactor: LoadFactor? = nil) {
         self.plannedTime = plannedTime
         self.predictedTime = predictedTime
         self.line = line
@@ -46,10 +48,11 @@ public class Departure: NSObject, NSSecureCoding {
         self.message = message
         self.journeyContext = journeyContext
         self.wagonSequenceContext = wagonSequenceContext
+        self.loadFactor = loadFactor
     }
     
-    convenience init(plannedTime: Date, predictedTime: Date?, line: Line, position: String?, plannedPosition: String?, cancelled: Bool, destination: Location?, journeyContext: QueryJourneyDetailContext?, wagonSequenceContext: URL? = nil) {
-        self.init(plannedTime: plannedTime, predictedTime: predictedTime, line: line, position: position, plannedPosition: plannedPosition, cancelled: cancelled, destination: destination, capacity: nil, message: nil, journeyContext: journeyContext, wagonSequenceContext: wagonSequenceContext)
+    convenience init(plannedTime: Date, predictedTime: Date?, line: Line, position: String?, plannedPosition: String?, cancelled: Bool, destination: Location?, journeyContext: QueryJourneyDetailContext?, wagonSequenceContext: URL? = nil, loadFactor: LoadFactor? = nil) {
+        self.init(plannedTime: plannedTime, predictedTime: predictedTime, line: line, position: position, plannedPosition: plannedPosition, cancelled: cancelled, destination: destination, capacity: nil, message: nil, journeyContext: journeyContext, wagonSequenceContext: wagonSequenceContext, loadFactor: loadFactor)
     }
     
     public required convenience init?(coder aDecoder: NSCoder) {

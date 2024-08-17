@@ -584,6 +584,21 @@ public class AbstractEfaWebProvider: AbstractEfaProvider {
             let predictedPosition = parsePosition(position: departure.element?.attribute(by: "platformName")?.text)
             let plannedPosition = parsePosition(position: departure.element?.attribute(by: "plannedPlatformName")?.text) ?? predictedPosition
             
+            var loadFactor: LoadFactor? = nil
+            if let occupancyText = departure.element?.attribute(by: "occupancy")?.text {
+                switch occupancyText {
+                case "MANY_SEATS":
+                    loadFactor = .medium
+                case "STANDING_ONLY":
+                    loadFactor = .high
+                case "FULL":
+                    loadFactor = .exceptional
+                default:
+                    loadFactor = .low
+                }
+            }
+            
+            
             let context: EfaJourneyContext?
             let tripCode = departure["itdServingTrip"].element?.attribute(by: "tripCode")?.text ?? departure["itdServingLine"].element?.attribute(by: "key")?.text
             if let stopId = assignedStopId, let tripCode = tripCode, line.id != nil {
@@ -592,7 +607,7 @@ public class AbstractEfaWebProvider: AbstractEfaProvider {
                 context = nil
             }
             
-            let departure = Departure(plannedTime: plannedTime, predictedTime: predictedTime, line: line, position: predictedPosition, plannedPosition: plannedPosition, cancelled: cancelled, destination: destination, capacity: nil, message: line.message, journeyContext: context)
+            let departure = Departure(plannedTime: plannedTime, predictedTime: predictedTime, line: line, position: predictedPosition, plannedPosition: plannedPosition, cancelled: cancelled, destination: destination, capacity: nil, message: line.message, journeyContext: context, loadFactor: loadFactor)
             result.first(where: {$0.stopLocation.id == assignedStopId})?.departures.append(departure)
         }
         
