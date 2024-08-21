@@ -41,6 +41,8 @@ public protocol Leg {
     ///
     /// See ``NetworkProvider/timeZone`` for a discussion about how to correctly handle time zones.
     var maxTime: Date { get }
+    
+    var description: String { get }
 }
 
 public extension Leg {
@@ -91,6 +93,24 @@ public class PublicLeg: NSObject, Leg, NSSecureCoding {
     public let wagonSequenceContext: QueryWagonSequenceContext?
     /// Load factor tells the expected train capacity utilisation of a train of the DB provider.
     public let loadFactor: LoadFactor?
+    
+    public override var description: String {
+        return ["{departure=", departure.description, ", ",
+                " arrival=", arrival.description,", ",
+                " departureTime=", departureTime.formatted(),", ",
+                " arrivalTime=", arrivalTime.formatted(),", ",
+                " minTime=", minTime.formatted(),", ",
+                " maxTime=", maxTime.formatted(),", ",
+                " line=", line.description,", ",
+                " destination=", destination?.description ?? "",", ",
+                " intermediateStops=", intermediateStops.count.formatted(),", ",
+                " message=", message ?? "",", ",
+                " journeyContext=", journeyContext?.description ?? "",", ",
+                " wagonSequenceContext=", wagonSequenceContext?.description ?? "",", ",
+                " loadFactor=", loadFactor?.rawValue.formatted() ?? "",", ",
+                " isCancelled=", isCancelled ? "True" : "False", "}"
+        ].joined()
+    }
     
     /// Returns true if either the departure or arrival stop have been cancelled.
     public var isCancelled: Bool {
@@ -155,10 +175,6 @@ public class PublicLeg: NSObject, Leg, NSSecureCoding {
         }
     }
     
-    public override var description: String {
-        return "Public departure=\(departure), arrival=\(arrival))"
-    }
-    
     public override func isEqual(_ other: Any?) -> Bool {
         guard let other = other as? PublicLeg else { return false }
         if other === self { return true }
@@ -205,6 +221,19 @@ public class IndividualLeg: NSObject, Leg, NSSecureCoding {
     /// Diestance in meters between departure and arrival.
     public let distance: Int
     
+    public override var description: String {
+        return ["{departure=", departure.description,", ",
+                " arrival=", arrival.description,", ",
+                " departureTime=", departureTime.formatted(),", ",
+                " arrivalTime=", arrivalTime.formatted(),", ",
+                " minTime=", minTime.formatted(),", ",
+                " maxTime=", maxTime.formatted(),", ",
+                " type=", type.toString(),", ",
+                " minutes=", min.formatted(),", ",
+                " distance=", distance.formatted(), "}"
+        ].joined()
+    }
+    
     public init(type: `Type`, departureTime: Date, departure: Location, arrival: Location, arrivalTime: Date, distance: Int, path: [LocationPoint]) {
         self.type = type
         self.departure = departure
@@ -247,6 +276,19 @@ public class IndividualLeg: NSObject, Leg, NSSecureCoding {
     
     public enum `Type`: Int {
         case walk, bike, car, transfer
+        
+        func toString() -> String {
+            switch self {
+            case .walk:
+                return "walk"
+            case .bike:
+                return "bike"
+            case .car:
+                return "car"
+            case .transfer:
+                return "transfer"
+            }
+        }
     }
     
     struct PropertyKey {

@@ -89,6 +89,20 @@ public class Trip: NSObject, NSSecureCoding {
         legs.compactMap({ $0 as? PublicLeg }).contains(where: { $0.isCancelled })
     }
     
+    public override var description: String {
+        return ["{tripid=", id, "; ",
+                " legs={", legs.compactMap({ $0.description }).joined(separator: "; "),
+                "} duration=", duration.formatted(), "; ",
+                " departureTime=", departureTime.formatted(), "; ",
+                " arrivalTime=", arrivalTime.formatted(), "; ",
+                " hasDeviantDeparture=", hasDeviantDeparture ? "True" : "False", "; ",
+                " hasDeviantArrival=", hasDeviantArrival ? "True": "False", "; ",
+                " minTime=", minTime.formatted(), "; ",
+                " maxTime=", maxTime.formatted(), "; ",
+                " isCancelled=", isCancelled ? "True" : "False", "}"
+        ].joined()
+    }
+    
     public init(id: String, from: Location, to: Location, legs: [Leg], duration: TimeInterval, fares: [Fare], refreshContext: RefreshTripContext? = nil) {
         assert(!legs.isEmpty, "Legs cannot be empty")
         self._id = id
@@ -148,10 +162,6 @@ public class Trip: NSObject, NSSecureCoding {
             result += "|"
         }
         return result
-    }
-    
-    public override var description: String {
-        return "Trip id=\(id) legs=\(legs)"
     }
     
     public override func isEqual(_ object: Any?) -> Bool {

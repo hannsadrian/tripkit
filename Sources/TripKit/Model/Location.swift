@@ -230,7 +230,12 @@ public class Location: NSObject, NSSecureCoding {
     }
     
     override public var description: String {
-        return getUniqueLongName()
+        return ["{type=", type.stringValue,", ",
+                "id=", id ?? "",", ",
+                "place=", place ?? "",", ",
+                "name=", name ?? "",", ",
+                "lat=", "\(Double(coord?.lat ?? 0) * pow(10, -6))",", ",
+                "lng=", "\(Double(coord?.lon ?? 0) * pow(10, -6))", "}"].joined()
     }
     
     public override func isEqual(_ object: Any?) -> Bool {
@@ -274,7 +279,7 @@ public class Location: NSObject, NSSecureCoding {
     
 }
 
-public enum LocationType: Int {
+public enum LocationType: Int, Codable {
     
     /** Location can represent any of the below. Mainly meant for user input. */
     case any,
