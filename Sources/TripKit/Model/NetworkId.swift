@@ -1,7 +1,7 @@
 /// ID of a transit provider.
 public enum NetworkId: String {
     // Europe
-    case RT,
+    case RT, MOTIS,
     
     // Germany
     DB, BVG, VBB, HVV, NVV, BAYERN, MVV, AVV, AVV2, VGN, INVG, VVM, VMV, SH, GVH, BSVAG, VBN, NASA, VSN, VOS, VMT, VVO, VMS, VGS, VRR, VRS, MVG, VRN, NRW, VVS, NALDO, DING, KVV, VAGFR, NVBW, RMV, VVV,

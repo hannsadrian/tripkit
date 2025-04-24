@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A1325852DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
+		3A1325862DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
+		3A1325872DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
+		3A1325882DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
+		3A13258A2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
+		3A13258B2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
+		3A13258C2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
+		3A13258D2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
+		3A13258F2DB95606007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A13258E2DB95600007C71AF /* secrets.json */; };
+		3A1325902DB95606007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A13258E2DB95600007C71AF /* secrets.json */; };
+		3A1325912DB95606007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A13258E2DB95600007C71AF /* secrets.json */; };
+		3A1325922DB95606007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A13258E2DB95600007C71AF /* secrets.json */; };
 		FA04C6C61E872F9E004535BA /* AvvAugsburgProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA04C6C51E872F9E004535BA /* AvvAugsburgProvider.swift */; };
 		FA0B56F227883061003E5A65 /* VvtProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B56F127883061003E5A65 /* VvtProvider.swift */; };
 		FA0B56F327883061003E5A65 /* VvtProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B56F127883061003E5A65 /* VvtProvider.swift */; };
@@ -974,6 +986,9 @@
 
 /* Begin PBXFileReference section */
 		2DBA1839F0E561F0397EB1F1 /* UrlEncodingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlEncodingTests.swift; sourceTree = "<group>"; };
+		3A1325842DB9520E007C71AF /* tmp.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = tmp.txt; sourceTree = "<group>"; };
+		3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractMotisProvider.swift; sourceTree = "<group>"; };
+		3A13258E2DB95600007C71AF /* secrets.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = secrets.json; sourceTree = "<group>"; };
 		FA04C6C51E872F9E004535BA /* AvvAugsburgProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AvvAugsburgProvider.swift; sourceTree = "<group>"; };
 		FA0B56F127883061003E5A65 /* VvtProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VvtProvider.swift; sourceTree = "<group>"; };
 		FA0B56F627883198003E5A65 /* VvtProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VvtProviderTests.swift; sourceTree = "<group>"; };
@@ -1087,7 +1102,7 @@
 		FA7CAA3E2799561800BE5147 /* BvbProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BvbProvider.swift; sourceTree = "<group>"; };
 		FA7CAA43279958A900BE5147 /* BvbProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BvbProviderTests.swift; sourceTree = "<group>"; };
 		FA7CAA47279958C800BE5147 /* BvbProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BvbProviderTests.swift; sourceTree = "<group>"; };
-		FA7D03E8228729A900DB192E /* secrets.json.template */ = {isa = PBXFileReference; lastKnownFileType = text; path = secrets.json.template; sourceTree = "<group>"; };
+		FA7D03E8228729A900DB192E /* secrets.json.template */ = {isa = PBXFileReference; explicitFileType = text.json; path = secrets.json.template; sourceTree = "<group>"; };
 		FA85135326E37CE7004B6DD4 /* RequestParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParameters.swift; sourceTree = "<group>"; };
 		FA85A9BB1F895D5D005C6691 /* VgsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VgsProvider.swift; sourceTree = "<group>"; };
 		FA87BA3A20B5B476004F1199 /* OoevvProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OoevvProvider.swift; sourceTree = "<group>"; };
@@ -1433,6 +1448,7 @@
 			isa = PBXGroup;
 			children = (
 				FA7058572271B3D80070D2C9 /* secrets.json */,
+				3A13258E2DB95600007C71AF /* secrets.json */,
 				FA7D03E8228729A900DB192E /* secrets.json.template */,
 				FA4C7F2D26EB3AA700BFD671 /* vrs-client-certificate.pfx */,
 				FA5C1CC32B41B52700DD90F9 /* sbb-certificate.crt */,
@@ -1462,6 +1478,7 @@
 		FA87AB0B24FBDEA300534505 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				3A1325842DB9520E007C71AF /* tmp.txt */,
 				FACB83C51E3FD0CE00AC5F1F /* TripKit */,
 			);
 			path = Sources;
@@ -1493,6 +1510,7 @@
 		FAB754151E3FD37D00C343F2 /* Provider */ = {
 			isa = PBXGroup;
 			children = (
+				3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */,
 				FAB7543A1E3FD3F300C343F2 /* NetworkProvider.swift */,
 				FA17ADA427A2E8BF006305B1 /* NetworkProvider+Async.swift */,
 				FAF1FC7329E471EC003996AE /* NetworkProvider+Extensions.swift */,
@@ -2216,6 +2234,8 @@
 			files = (
 				FA5C1CC62B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				FA4C7F3026EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
+				3A1325852DB95213007C71AF /* tmp.txt in Resources */,
+				3A1325922DB95606007C71AF /* secrets.json in Resources */,
 				FA5CD2C924FBB2A900B4990A /* secrets.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2226,6 +2246,8 @@
 			files = (
 				FA5C1CC72B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				FA4C7F3126EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
+				3A1325862DB95213007C71AF /* tmp.txt in Resources */,
+				3A13258F2DB95606007C71AF /* secrets.json in Resources */,
 				FA5CD2D624FBB2AA00B4990A /* secrets.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2250,6 +2272,8 @@
 			files = (
 				FA5C1CC42B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				FA4C7F2E26EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
+				3A1325882DB95213007C71AF /* tmp.txt in Resources */,
+				3A1325912DB95606007C71AF /* secrets.json in Resources */,
 				FA8FE64D22741E11003CE4B4 /* secrets.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2315,6 +2339,8 @@
 			files = (
 				FA5C1CC52B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				FA4C7F2F26EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
+				3A1325872DB95213007C71AF /* tmp.txt in Resources */,
+				3A1325902DB95606007C71AF /* secrets.json in Resources */,
 				FA8FE64C22741E11003CE4B4 /* secrets.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2356,6 +2382,7 @@
 				FA5CD2BF24FBB2A900B4990A /* HttpClient.swift in Sources */,
 				FA5CD29E24FBB29C00B4990A /* SuggestedLocation.swift in Sources */,
 				FA5CD24A24FBB29000B4990A /* VrnProvider.swift in Sources */,
+				3A13258D2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */,
 				FA5CD25B24FBB29000B4990A /* SvvProvider.swift in Sources */,
 				FA5CD24024FBB29000B4990A /* VbnProvider.swift in Sources */,
 				FA2C85C525F13BBE003880FB /* Bundle.swift in Sources */,
@@ -2469,6 +2496,7 @@
 				FA5CD2CC24FBB2AA00B4990A /* HttpClient.swift in Sources */,
 				FA5CD2AE24FBB29D00B4990A /* SuggestedLocation.swift in Sources */,
 				FA5CD27F24FBB29000B4990A /* VrnProvider.swift in Sources */,
+				3A13258C2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */,
 				FA5CD29024FBB29000B4990A /* SvvProvider.swift in Sources */,
 				FA5CD27524FBB29000B4990A /* VbnProvider.swift in Sources */,
 				FA2C85C625F13BBE003880FB /* Bundle.swift in Sources */,
@@ -2708,6 +2736,7 @@
 				FAB754291E3FD3E500C343F2 /* Line.swift in Sources */,
 				FAB754331E3FD3E500C343F2 /* Style.swift in Sources */,
 				FA37CD7F1FFC0AE000B5D93D /* HvvProvider.swift in Sources */,
+				3A13258B2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */,
 				FAB7542F1E3FD3E500C343F2 /* QueryDeparturesResult.swift in Sources */,
 				FA2C85C325F13BBE003880FB /* Bundle.swift in Sources */,
 				FAB7542A1E3FD3E500C343F2 /* Location.swift in Sources */,
@@ -3100,6 +3129,7 @@
 				FAFF18931FA50B9500A8ED69 /* Line.swift in Sources */,
 				FAFF18941FA50B9500A8ED69 /* Style.swift in Sources */,
 				FAFF18951FA50B9500A8ED69 /* QueryDeparturesResult.swift in Sources */,
+				3A13258A2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */,
 				FAFF18961FA50B9500A8ED69 /* Location.swift in Sources */,
 				FA2C85C425F13BBE003880FB /* Bundle.swift in Sources */,
 				FAFF18971FA50B9500A8ED69 /* ServingLine.swift in Sources */,
@@ -3679,7 +3709,7 @@
 				ENABLE_MODULE_VERIFIER = YES;
 				INFOPLIST_FILE = "Supporting Files/Info-iOS.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3717,7 +3747,7 @@
 				ENABLE_MODULE_VERIFIER = YES;
 				INFOPLIST_FILE = "Supporting Files/Info-iOS.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
