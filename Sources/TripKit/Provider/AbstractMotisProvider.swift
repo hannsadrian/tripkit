@@ -305,30 +305,57 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         }
 
     public override func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, equivs: Bool, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest {
-        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/stoptimes", encoding: .utf8)
-        urlBuilder.addParameter(key: "stopId", value: stationId)
-        urlBuilder.addParameter(key: "n", value: maxDepartures) // 'n' parameter for number of events
-        urlBuilder.addParameter(key: "arriveBy", value: !departures)
-        if let time = time {
-            urlBuilder.addParameter(key: "time", value: isoFormatter.string(from: time), percentCoded: false)
+        
+        func performRequest(currentRadius: Int?, isRetry: Bool) -> AsyncRequest {
+            let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/stoptimes", encoding: .utf8)
+            urlBuilder.addParameter(key: "stopId", value: stationId)
+            urlBuilder.addParameter(key: "n", value: maxDepartures) // 'n' parameter for number of events
+            urlBuilder.addParameter(key: "arriveBy", value: !departures)
+            if let time = time {
+                urlBuilder.addParameter(key: "time", value: isoFormatter.string(from: time), percentCoded: false)
+            }
+            
+            if let radius = currentRadius {
+                 urlBuilder.addParameter(key: "radius", value: radius)
+            }
+            // Optional: Filter by mode?
+            // urlBuilder.addParameter(key: "mode", value: ["BUS", "TRAM"].joined(separator: ","))
+            
+            let httpRequest = HttpRequest(urlBuilder: urlBuilder)
+            // Add API Key header if necessary
+            // if let apiKey = apiKey { httpRequest.headers = ["X-API-Key": apiKey] }
+            
+            return makeRequest(httpRequest, parseHandler: { [weak self] in
+                try self?.queryDeparturesParsing(request: httpRequest, stationId: stationId, departures: departures, time: time, maxDepartures: maxDepartures, equivs: equivs, completion: { request, parsedDepartures in
+                    switch parsedDepartures {
+                    case .success(departures: let deps):
+                        if !isRetry && !equivs && deps.isEmpty {
+                            print("Radius 0 returned no results, trying with radius 1...")
+                            // Perform the second request with radius=1
+                            // IMPORTANT: We don't call the completion handler here.
+                            // The second request's completion/error handler will call it.
+                            // We need to ensure the AsyncRequest handle from the *second* call
+                            // is somehow managed, but for simplicity, we launch it.
+                            // The original function technically returns the handle for the *first* request.
+                             _ = performRequest(currentRadius: 1, isRetry: true) // Make the retry request
+                        } else {
+                            completion(request, parsedDepartures)
+                        }
+                    default:
+                        completion(request, parsedDepartures)
+                    }
+                    
+                })
+                
+                
+            }, errorHandler: { error in
+                completion(httpRequest, .failure(error))
+            })
         }
-        // 'equivs' roughly maps to MOTIS 'radius'. If equivs=true, maybe set a default radius?
-        // The spec says default behavior includes parent + same name stops, which might be sufficient for equivs=true.
-        if !equivs {
-            urlBuilder.addParameter(key: "radius", value: "0")
-        }
-        // Optional: Filter by mode?
-        // urlBuilder.addParameter(key: "mode", value: ["BUS", "TRAM"].joined(separator: ","))
-
-        let httpRequest = HttpRequest(urlBuilder: urlBuilder)
-        // Add API Key header if necessary
-        // if let apiKey = apiKey { httpRequest.headers = ["X-API-Key": apiKey] }
-
-        return makeRequest(httpRequest, parseHandler: { [weak self] in
-            try self?.queryDeparturesParsing(request: httpRequest, stationId: stationId, departures: departures, time: time, maxDepartures: maxDepartures, equivs: equivs, completion: completion)
-        }, errorHandler: { error in
-            completion(httpRequest, .failure(error))
-        })
+        
+        // Determine the radius for the *first* request based on `equivs`
+        let initialRadius: Int? = equivs ? nil : 0 // nil means default API behavior, 0 means explicit zero radius
+        return performRequest(currentRadius: initialRadius, isRetry: false)
     }
 
     public override func queryTrips(from: Location, via: Location?, to: Location, date: Date, departure: Bool, tripOptions: TripOptions, completion: @escaping (HttpRequest, QueryTripsResult) -> Void) -> AsyncRequest {
@@ -962,6 +989,9 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             if splits.count > 2 {
                 place = String(splits.last ?? "")
             }
+        }
+        if let track = json["track"].string ?? json["scheduledTrack"].string {
+            place = track
         }
         if place?.isEmpty ?? false {
             place = nil

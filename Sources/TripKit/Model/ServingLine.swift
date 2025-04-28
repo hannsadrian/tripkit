@@ -35,11 +35,7 @@ public class ServingLine: NSObject, NSSecureCoding {
     }
     
     override public var hash: Int {
-        if let destination = destination {
-            return line.hash + destination.getUniqueShortName().hash
-        } else {
-            return line.hash
-        }
+        return line.hash
     }
     
     struct PropertyKey {
