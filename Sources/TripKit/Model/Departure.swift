@@ -112,14 +112,20 @@ public class Departure: NSObject, NSSecureCoding {
         if self.plannedTime != other.plannedTime { return false }
         if self.destination != other.destination { return false }
         if self.line != other.line { return false }
+        if self.journeyContext != other.journeyContext { return false }
         
         return true
     }
     
     public override var hash: Int {
-        get {
-            return "\(plannedTime):\(destination?.getUniqueShortName() ?? ""):\(line.product?.rawValue ?? ""):\(line.label ?? ""):\(line.network ?? "")".hash
-        }
+        var hasher = Hasher()
+        hasher.combine(plannedTime)
+        hasher.combine(journeyContext) // Hashes based on MotisQueryJourneyDetailContext.hash (tripId)
+        hasher.combine(destination)
+        hasher.combine(line)
+        // If we needed to include Line:
+        // hasher.combine(line)
+        return hasher.finalize()
     }
     
     public override var description: String {

@@ -14,35 +14,50 @@ public class ServingLine: NSObject, NSSecureCoding {
         self.destination = destination
     }
     
+    // MARK: - NSSecureCoding
+
     public required convenience init?(coder aDecoder: NSCoder) {
-        guard let line = aDecoder.decodeObject(of: Line.self, forKey: PropertyKey.lineKey) as Line? else { return nil }
-        let destination = aDecoder.decodeObject(of: Location.self, forKey: PropertyKey.destinationKey) as Location?
+        guard let line = aDecoder.decodeObject(of: Line.self, forKey: PropertyKey.lineKey) else { return nil }
+        // Use decodeObject(of:forKey:) for optionals too, it handles nil
+        let destination = aDecoder.decodeObject(of: Location.self, forKey: PropertyKey.destinationKey)
         self.init(line: line, destination: destination)
     }
-    
+
     public func encode(with aCoder: NSCoder) {
         aCoder.encode(line, forKey: PropertyKey.lineKey)
-        if let destination = destination {
-            aCoder.encode(destination, forKey: PropertyKey.destinationKey)
-        }
+        // No need to check for nil, encode handles it correctly
+        aCoder.encode(destination, forKey: PropertyKey.destinationKey)
     }
-    
+
+    // MARK: - Equatable (via isEqual)
+
     override public func isEqual(_ object: Any?) -> Bool {
-        guard let object = object as? ServingLine else { return false }
-        if object.line != self.line { return false }
+        guard let other = object as? ServingLine else {
+            return false
+        }
         
-        return self.destination == object.destination
+        if self === other {
+             return true
+        }
+        
+        return self.line == other.line && self.destination == other.destination
     }
-    
+
+    // MARK: - Hashable (via hash)
+
     override public var hash: Int {
-        return line.hash
+        var hasher = Hasher()
+        // Ensure Line and Location conform to Hashable correctly
+        hasher.combine(line)
+        hasher.combine(destination) // Combine destination as well!
+        return hasher.finalize()
     }
-    
-    struct PropertyKey {
-        
+
+    // MARK: - PropertyKeys (can be private)
+
+    private struct PropertyKey { // Changed to private
         static let lineKey = "line"
         static let destinationKey = "destination"
-        
     }
     
 }

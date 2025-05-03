@@ -120,14 +120,34 @@ public class Line: NSObject, NSSecureCoding {
         }
     }
     
-    public override func isEqual(_ object: Any?) -> Bool {
-        guard let object = object as? Line else { return false }
-        return object.product == product && object.label == label
+    override public func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? Line else { return false }
+        if self === other { return true }
+
+        // Prioritize ID if available
+        if let selfId = self.id, let otherId = other.id {
+            return selfId == otherId
+        }
+        // If IDs aren't comparable, fall back to product and label (as before)
+        // Ensure network is also considered if it's part of identity
+        return self.product == other.product &&
+               self.label == other.label &&
+               self.network == other.network // Make comparison consistent with hash
     }
     
-    public override var hash: Int {
-        return "\(product?.rawValue ?? ""):\(label ?? ""):\(network ?? "")".hash
-    }
+    override public var hash: Int {
+            var hasher = Hasher()
+            // Prioritize ID if available
+            if let id = self.id {
+                hasher.combine(id)
+            } else {
+                // If no ID, use product, label, and network (consistent with isEqual fallback)
+                hasher.combine(product)
+                hasher.combine(label)
+                hasher.combine(network)
+            }
+            return hasher.finalize()
+        }
     
     public override var description: String {
         return "Line id=\(id ?? ""), network=\(network ?? ""), product=\(product?.rawValue ?? ""), label=\(label ?? ""), name=\(name ?? ""), vehicleNumber=\(vehicleNumber ?? "")"

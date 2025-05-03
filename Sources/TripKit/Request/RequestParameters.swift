@@ -27,7 +27,9 @@ public enum Accessibility: Int {
 
 /// Additional trip options
 public enum Option: Int {
+    case timed
     case bike
+    case rental
 }
 
 /// Settings for requesting different tariff information.

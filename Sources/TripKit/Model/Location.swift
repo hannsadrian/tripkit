@@ -238,32 +238,55 @@ public class Location: NSObject, NSSecureCoding {
                 "lng=", "\(Double(coord?.lon ?? 0) * pow(10, -6))", "}"].joined()
     }
     
-    public override func isEqual(_ object: Any?) -> Bool {
-        guard let other = object as? Location else { return false }
-        if self === other { return true }
-        if self.type != other.type { return false }
-        if let id = self.id {
-            return id == other.id ?? ""
-        }
-        if coord != nil && other.coord != nil && coord == other.coord { return true }
-        if self.place != other.place { return false }
-        if self.name != other.name { return false }
-        
-        return true
-    }
-    
-    public override var hash: Int {
-        get {
-            if let id = id {
-                return id.hash
-            } else {
-                if let coord = coord {
-                    return "\(coord.lat):\(coord.lon)".hashValue
-                }
-                return type.hashValue
+    override public func isEqual(_ object: Any?) -> Bool {
+            guard let other = object as? Location else { return false }
+            if self === other { return true }
+
+            // 1. Different types are never equal
+            guard self.type == other.type else { return false }
+
+            // 2. If IDs exist, they must match (primary identifier)
+            if let selfId = self.id, let otherId = other.id {
+                return selfId == otherId
             }
+            // Handle cases where one or both IDs are nil
+            if self.id != nil || other.id != nil {
+                 // If one has an ID and the other doesn't, they are not equal (unless both are nil, covered below)
+                 // If both had IDs, we would have returned true/false already.
+                return false
+            }
+
+            // 3. If no IDs, compare coordinates if both exist
+            if let selfCoord = self.coord, let otherCoord = other.coord {
+                return selfCoord == otherCoord // Assumes LocationPoint is Equatable
+            }
+            // Handle cases where one or both coords are nil
+            if self.coord != nil || other.coord != nil {
+                // If one has coords and the other doesn't, they are not equal
+                return false
+            }
+
+            // 4. If no IDs and no coords, compare place and name (last resort)
+            //    Treat nil names/places consistently
+            return self.place == other.place && self.name == other.name
         }
-    }
+
+        override public var hash: Int {
+            var hasher = Hasher()
+            // Hash based on the *same logic path* as isEqual
+            hasher.combine(type) // Always include type
+
+            if let id = self.id {
+                hasher.combine(id) // Prioritize ID
+            } else if let coord = self.coord {
+                hasher.combine(coord.lat) // Use coordinates if no ID
+                hasher.combine(coord.lon)
+            } else {
+                hasher.combine(place) // Use place and name if no ID and no coord
+                hasher.combine(name)
+            }
+            return hasher.finalize()
+        }
     
     struct PropertyKey {
         

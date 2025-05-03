@@ -102,6 +102,18 @@ public class MotisQueryJourneyDetailContext: QueryJourneyDetailContext {
         super.encode(with: aCoder)
         aCoder.encode(tripId, forKey: PropertyKey.tripId)
     }
+    
+    override public func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? MotisQueryJourneyDetailContext else { return false }
+        if self === other { return true }
+        // Compare based on the value of tripId
+        return self.tripId == other.tripId
+    }
+
+    override public var hash: Int {
+        // Hash based on the value of tripId
+        return tripId.hashValue
+    }
 
     struct PropertyKey {
         static let tripId = "tripId"
@@ -199,13 +211,13 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         let modeStrings = products.compactMap { product -> String? in
             switch product {
             case .highSpeedTrain: return "HIGHSPEED_RAIL" // Or maybe "RAIL" or specific types
-            case .regionalTrain: return "REGIONAL_RAIL" // Or maybe "RAIL"
-            case .suburbanTrain: return "REGIONAL_RAIL" // MOTIS seems to group S-Bahn under regional
+            case .regionalTrain: return "REGIONAL_RAIL,REGIONAL_FAST_RAIL" // Or maybe "RAIL"
+            case .suburbanTrain: return "METRO" // MOTIS seems to group S-Bahn under regional
             case .subway: return "SUBWAY"
             case .tram: return "TRAM"
             case .bus: return "BUS" // Excludes COACH
             case .ferry: return "FERRY"
-            case .onDemand: return nil // MOTIS might have 'ODM' or specific rental modes
+            case .onDemand: return "ODM" // MOTIS might have 'ODM' or specific rental modes
             case .cablecar: return "OTHER" // Or specific if MOTIS supports it
             // Add mappings for other MOTIS modes if needed (AIRPLANE, COACH, METRO, etc.)
             }
@@ -398,6 +410,13 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             urlBuilder.addParameter(key: "time", value: isoFormatter.string(from: date))
             urlBuilder.addParameter(key: "arriveBy", value: !departure)
             urlBuilder.addParameter(key: "detailedTransfers", value: true) // Usually needed for TripKit paths
+            urlBuilder.addParameter(key: "maxPreTransitTime", value: 1800)
+            urlBuilder.addParameter(key: "maxPostTransitTime", value: 1800)
+            urlBuilder.addParameter(key: "maxDirectTime", value: 3600)
+            
+            if tripOptions.options?.contains(.timed) ?? false {
+                urlBuilder.addParameter(key: "timetableView", value: false)
+            }
 
             if let viaLocation = via {
                 if let viaId = viaLocation.id, !viaId.isEmpty {
@@ -409,7 +428,13 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
                 }
             }
 
-            if let modes = formatModesForQuery(tripOptions.products) {
+            if var modes = formatModesForQuery(tripOptions.products) {
+                if tripOptions.options?.contains(.bike) ?? false {
+                    modes.append("BIKE")
+                }
+                if tripOptions.options?.contains(.rental) ?? false {
+                    modes.append("RENTAL")
+                }
                 urlBuilder.addParameter(key: "transitModes", value: modes.joined(separator: ",")) // Assuming comma separation
             }
 
@@ -424,8 +449,15 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
                  urlBuilder.addParameter(key: "pedestrianProfile", value: profile)
              }
              if tripOptions.options?.contains(.bike) ?? false {
-                 urlBuilder.addParameter(key: "requireBikeTransport", value: true)
+                 urlBuilder.addParameter(key: "preTransitModes", value: "BIKE")
+                 urlBuilder.addParameter(key: "postTransitModes", value: "BIKE")
+                 urlBuilder.addParameter(key: "directModes", value: "BIKE")
              }
+            if tripOptions.options?.contains(.rental) ?? false {
+                urlBuilder.addParameter(key: "preTransitModes", value: "RENTAL")
+                urlBuilder.addParameter(key: "postTransitModes", value: "RENTAL")
+                urlBuilder.addParameter(key: "directModes", value: "RENTAL")
+            }
              if let maxFootTime = tripOptions.maxFootpathTime { // Map to MOTIS time limits (in seconds)
                  let maxTimeSeconds = maxFootTime * 60
                  urlBuilder.addParameter(key: "maxPreTransitTime", value: maxTimeSeconds)
@@ -535,9 +567,22 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         let json = try getResponse(from: request)
         var suggestions: [SuggestedLocation] = []
 
+        let motisTypes = types?.compactMap { type -> String? in
+            switch type {
+            case .station: return "STOP"
+            case .poi: return "PLACE"
+            case .address: return "ADDRESS"
+            case .coord, .any: return nil // COORD not directly supported, ANY is implicit
+            }
+        }
+        
         for item in json.arrayValue {
             if let location = parseLocation(fromMatch: item) {
                 let priority = item["score"].intValue // Use MOTIS score as priority
+                
+                if motisTypes != nil && !motisTypes!.contains(where: { $0 == item["type"].stringValue }) {
+                    continue
+                }
                 suggestions.append(SuggestedLocation(location: location, priority: priority))
             }
         }
@@ -588,8 +633,8 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         // For simplicity here, assume all returned stopTimes belong to the requested stationId or its equivalents.
         // We'll create one StationDepartures object.
 
-        var parsedDepartures: [Departure] = []
-        var servingLines = Set<ServingLine>() // Use Set to auto-deduplicate
+        var uniqueDepartures = Set<Departure>()
+        var servingLines = Set<ServingLine>()
 
         for item in json["stopTimes"].arrayValue {
             guard let placeJson = item["place"].dictionary,
@@ -611,16 +656,16 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
                 continue
             }
 
-             // Determine destination from headsign or trip info? MOTIS stoptime doesn't directly list final destination.
-             // We might need to parse the headsign or leave it nil.
-             let destinationName = item["headsign"].string // Use headsign as destination name proxy
-             let destination = destinationName != nil ? Location(anyName: destinationName) : nil // Simple name-based location
+            // Determine destination from headsign or trip info? MOTIS stoptime doesn't directly list final destination.
+            // We might need to parse the headsign or leave it nil.
+            let destinationName = item["headsign"].string // Use headsign as destination name proxy
+            let destination = destinationName != nil ? Location(anyName: destinationName) : nil // Simple name-based location
 
             let journeyContext = MotisQueryJourneyDetailContext(tripId: item["tripId"].stringValue)
 
-             // MOTIS stoptime doesn't have wagon sequence context
-             let wagonSequenceContext: URL? = nil
-             // MOTIS stoptime doesn't have load factor
+            // MOTIS stoptime doesn't have wagon sequence context
+            let wagonSequenceContext: URL? = nil
+            // MOTIS stoptime doesn't have load factor
             
             let realtime = item["realTime"].bool
 
@@ -638,10 +683,17 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
                 wagonSequenceContext: wagonSequenceContext,
                 loadFactor: nil // Not available
             )
-            parsedDepartures.append(departure)
+            let (inserted, _) = uniqueDepartures.insert(departure)
+            if !inserted {
+                os_log("Duplicate departure detected and ignored: %@", log: .default, type: .debug, departure.description)
+            }
 
-            // Add serving line
-             servingLines.insert(ServingLine(line: line, destination: destination))
+
+            // Add serving line (Set handles duplicates automatically)
+            if let dest = destination { // Only add if destination is known? Adjust as needed
+                let servingLine = ServingLine(line: line, destination: dest)
+                servingLines.insert(servingLine)
+            }
         }
 
         // Create the StationDepartures object
@@ -652,7 +704,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             // Fallback or error if we can't determine the main station location
             // If stationId was provided, we might already have the Location object?
             // For now, throw error if no departures found or first place invalid
-            if parsedDepartures.isEmpty {
+            if uniqueDepartures.isEmpty {
                  completion(request, .success(departures: [])) // No departures found
                  return
             } else {
@@ -662,7 +714,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
 
         let stationDepartures = StationDepartures(
             stopLocation: stationLocation, // Use location from first event as primary
-            departures: parsedDepartures,
+            departures: Array(uniqueDepartures),
             lines: Array(servingLines)
         )
 
@@ -872,7 +924,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
                  case "WALK": type = .walk
                  case "BIKE": type = .bike
                  case "CAR": type = .car
-                 // case "RENTAL": type = .transfer // Or map to specific types if needed
+                 case "RENTAL": type = .bike // Or map to specific types if needed
                  default: type = .transfer // Default for unknown or non-public modes
              }
 
