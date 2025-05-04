@@ -39,6 +39,13 @@ open class SuggestedLocation: NSObject, NSSecureCoding {
         return self.location == other.location
     }
     
+    override public var hash: Int {
+        var hasher = Hasher()
+        hasher.combine(location)
+        hasher.combine(priority)
+        return hasher.finalize()
+    }
+    
     struct PropertyKey {
         
         static let locationKey = "location"

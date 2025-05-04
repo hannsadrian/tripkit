@@ -7,10 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3A1325852DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
-		3A1325862DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
-		3A1325872DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
-		3A1325882DB95213007C71AF /* tmp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325842DB9520E007C71AF /* tmp.txt */; };
 		3A13258A2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
 		3A13258B2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
 		3A13258C2DB95311007C71AF /* AbstractMotisProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */; };
@@ -982,7 +978,6 @@
 
 /* Begin PBXFileReference section */
 		2DBA1839F0E561F0397EB1F1 /* UrlEncodingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlEncodingTests.swift; sourceTree = "<group>"; };
-		3A1325842DB9520E007C71AF /* tmp.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = tmp.txt; sourceTree = "<group>"; };
 		3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractMotisProvider.swift; sourceTree = "<group>"; };
 		3A1325932DBA5122007C71AF /* secrets.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = secrets.json; sourceTree = "<group>"; };
 		FA04C6C51E872F9E004535BA /* AvvAugsburgProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AvvAugsburgProvider.swift; sourceTree = "<group>"; };
@@ -1472,7 +1467,6 @@
 		FA87AB0B24FBDEA300534505 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				3A1325842DB9520E007C71AF /* tmp.txt */,
 				FACB83C51E3FD0CE00AC5F1F /* TripKit */,
 			);
 			path = Sources;
@@ -2229,7 +2223,6 @@
 				FA5C1CC62B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				3A1325962DBA5128007C71AF /* secrets.json in Resources */,
 				FA4C7F3026EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
-				3A1325852DB95213007C71AF /* tmp.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2240,7 +2233,6 @@
 				FA5C1CC72B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				3A1325972DBA5128007C71AF /* secrets.json in Resources */,
 				FA4C7F3126EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
-				3A1325862DB95213007C71AF /* tmp.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2265,7 +2257,6 @@
 				FA5C1CC42B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				3A1325952DBA5128007C71AF /* secrets.json in Resources */,
 				FA4C7F2E26EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
-				3A1325882DB95213007C71AF /* tmp.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2331,7 +2322,6 @@
 				FA5C1CC52B41B52700DD90F9 /* sbb-certificate.crt in Resources */,
 				3A1325942DBA5128007C71AF /* secrets.json in Resources */,
 				FA4C7F2F26EB3AA700BFD671 /* vrs-client-certificate.pfx in Resources */,
-				3A1325872DB95213007C71AF /* tmp.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

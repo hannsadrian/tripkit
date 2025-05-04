@@ -1152,8 +1152,9 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
          case "SUBWAY": return .subway
          case "FERRY": return .ferry
          case "BUS": return .bus
-         case "RAIL", "METRO", "REGIONAL_RAIL", "REGIONAL_FAST_RAIL", "LONG_DISTANCE": return .regionalTrain // Group various rail types?
-         case "HIGHSPEED_RAIL": return .highSpeedTrain
+         case "METRO": return .suburbanTrain
+         case "RAIL", "REGIONAL_RAIL", "REGIONAL_FAST_RAIL": return .regionalTrain // Group various rail types?
+         case "HIGHSPEED_RAIL", "LONG_DISTANCE": return .highSpeedTrain
          case "NIGHT_RAIL": return .highSpeedTrain // Group night trains with high speed? Or regional?
          case "COACH": return .bus // Group long distance coach with bus?
          case "AIRPLANE": return nil // TripKit doesn't have an airplane product
