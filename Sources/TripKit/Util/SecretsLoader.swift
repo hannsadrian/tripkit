@@ -20,20 +20,8 @@ public class SecretsLoader {
             let apiBase = entry["apiBase"].stringValue
             let apiAuthorization = entry["apiAuthorization"].dictionaryObject ?? [:]
             let certAuthorization = entry["certAuthorization"].dictionaryObject ?? [:]
-            let requestVerificationType = entry["requestVerification"]["type"].stringValue
-            let requestVerification: AbstractHafasClientInterfaceProvider.RequestVerification
-            switch requestVerificationType {
-            case "checksum":
-                requestVerification = .checksum(salt: entry["requestVerification"]["salt"].stringValue)
-            case "micMac":
-                requestVerification = .micMac(salt: entry["requestVerification"]["salt"].stringValue)
-            case "rnd":
-                requestVerification = .rnd
-            default:
-                requestVerification = .none
-            }
             let apiKey = entry["apiKey"].stringValue
-            result[id] = AuthorizationData(apiBase: apiBase, hciAuthorization: apiAuthorization, certAuthorization: certAuthorization, hciRequestVerification: requestVerification, apiKey: apiKey)
+            result[id] = AuthorizationData(apiBase: apiBase, hciAuthorization: apiAuthorization, certAuthorization: certAuthorization, apiKey: apiKey)
         }
         return result
     }

@@ -79,19 +79,19 @@ public extension NetworkProvider {
  
     - Returns: A reference to a cancellable http request.
      */
-    @discardableResult func queryDepartures(stationId: String, departures: Bool, time: Date?, minDepartures: Int, maxDepartures: Int, equivs: Bool, completion: @escaping (QueryDeparturesResult) -> Void) -> AsyncRequest {
+    @discardableResult func queryDepartures(stationId: String, departures: Bool, time: Date?, minDepartures: Int, maxDepartures: Int, radius: Int?, completion: @escaping (QueryDeparturesResult) -> Void) -> AsyncRequest {
         let asyncRequest = AsyncRequest(task: nil)
-        queryDeparturesRecursive(asyncRequest: asyncRequest, stationId: stationId, departures: departures, startTime: time, minDepartures: minDepartures, maxDepartures: maxDepartures, equivs: equivs, stationDepartures: [], completion: completion)
+        queryDeparturesRecursive(asyncRequest: asyncRequest, stationId: stationId, departures: departures, startTime: time, minDepartures: minDepartures, maxDepartures: maxDepartures, radius: radius, stationDepartures: [], completion: completion)
         return asyncRequest
     }
     
-    private func queryDeparturesRecursive(asyncRequest: AsyncRequest, stationId: String, departures: Bool, startTime: Date?, minDepartures: Int, maxDepartures: Int, equivs: Bool, stationDepartures: [StationDepartures], completion: @escaping (QueryDeparturesResult) -> Void) {
-        asyncRequest.task = queryDepartures(stationId: stationId, departures: departures, time: startTime, maxDepartures: maxDepartures, equivs: equivs) { _, result in
-            self.handleQueryDeparturesRecursive(result: result, asyncRequest: asyncRequest, stationId: stationId, departures: departures, startTime: startTime, minDepartures: minDepartures, maxDepartures: maxDepartures, equivs: equivs, stationDepartures: stationDepartures, completion: completion)
+    private func queryDeparturesRecursive(asyncRequest: AsyncRequest, stationId: String, departures: Bool, startTime: Date?, minDepartures: Int, maxDepartures: Int, radius: Int?, stationDepartures: [StationDepartures], completion: @escaping (QueryDeparturesResult) -> Void) {
+        asyncRequest.task = queryDepartures(stationId: stationId, departures: departures, time: startTime, maxDepartures: maxDepartures, radius: radius) { _, result in
+            self.handleQueryDeparturesRecursive(result: result, asyncRequest: asyncRequest, stationId: stationId, departures: departures, startTime: startTime, minDepartures: minDepartures, maxDepartures: maxDepartures, radius: radius, stationDepartures: stationDepartures, completion: completion)
         }.task
     }
     
-    private func handleQueryDeparturesRecursive(result: QueryDeparturesResult, asyncRequest: AsyncRequest, stationId: String, departures: Bool, startTime: Date?, minDepartures: Int, maxDepartures: Int, equivs: Bool, stationDepartures: [StationDepartures], completion: @escaping (QueryDeparturesResult) -> Void) {
+    private func handleQueryDeparturesRecursive(result: QueryDeparturesResult, asyncRequest: AsyncRequest, stationId: String, departures: Bool, startTime: Date?, minDepartures: Int, maxDepartures: Int, radius: Int?, stationDepartures: [StationDepartures], completion: @escaping (QueryDeparturesResult) -> Void) {
         var stationDepartures = stationDepartures
         switch result {
         case .success(let resultDepartures):
@@ -106,7 +106,7 @@ public extension NetworkProvider {
             
             let sortedDepartures = stationDepartures.flatMap({ $0.departures }).sorted(by: {$0.time < $1.time})
             if sortedDepartures.count < minDepartures {
-                queryDeparturesRecursive(asyncRequest: asyncRequest, stationId: stationId, departures: departures, startTime: sortedDepartures.last?.plannedTime, minDepartures: minDepartures, maxDepartures: maxDepartures, equivs: equivs, stationDepartures: stationDepartures, completion: completion)
+                queryDeparturesRecursive(asyncRequest: asyncRequest, stationId: stationId, departures: departures, startTime: sortedDepartures.last?.plannedTime, minDepartures: minDepartures, maxDepartures: maxDepartures, radius: radius, stationDepartures: stationDepartures, completion: completion)
             } else {
                 completion(.success(departures: stationDepartures))
             }

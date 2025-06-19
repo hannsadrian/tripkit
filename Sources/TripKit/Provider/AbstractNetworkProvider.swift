@@ -52,7 +52,7 @@ public class AbstractNetworkProvider: NetworkProvider {
         fatalError("\(#function) not implemented")
     }
     
-    public func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, equivs: Bool, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest {
+    public func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, radius: Int?, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest {
         fatalError("\(#function) not implemented")
     }
     
@@ -90,7 +90,7 @@ public class AbstractNetworkProvider: NetworkProvider {
         fatalError("\(#function) not implemented")
     }
     
-    func queryDeparturesParsing(request: HttpRequest, stationId: String, departures: Bool, time: Date?, maxDepartures: Int, equivs: Bool, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) throws {
+    func queryDeparturesParsing(request: HttpRequest, stationId: String, departures: Bool, time: Date?, maxDepartures: Int, radius: Int?, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) throws {
         fatalError("\(#function) not implemented")
     }
     

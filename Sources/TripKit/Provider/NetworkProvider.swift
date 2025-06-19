@@ -119,7 +119,7 @@ public protocol NetworkProvider {
  
     - Returns: A reference to a cancellable http request.
      */
-    @discardableResult func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, equivs: Bool, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest
+    @discardableResult func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, radius: Int?, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest
     
     /**
     Get details of a line journey.

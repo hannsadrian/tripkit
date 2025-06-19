@@ -30,7 +30,7 @@ open class SuggestedLocation: NSObject, NSSecureCoding {
     }
     
     public override var description: String {
-        return location.description
+        return location.id ?? location.description
     }
     
     open override func isEqual(_ other: Any?) -> Bool {
@@ -40,10 +40,11 @@ open class SuggestedLocation: NSObject, NSSecureCoding {
     }
     
     override public var hash: Int {
-        var hasher = Hasher()
-        hasher.combine(location)
-        hasher.combine(priority)
-        return hasher.finalize()
+        // Der Hash-Wert sollte NUR auf den Eigenschaften basieren,
+        // die auch in isEqual() verwendet werden. In diesem Fall ist das nur 'location'.
+        // Die einfachste und korrekte Implementierung ist, den Hash-Wert
+        // direkt von der 'location' zu übernehmen.
+        return location.hash
     }
     
     struct PropertyKey {

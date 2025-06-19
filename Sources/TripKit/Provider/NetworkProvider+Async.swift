@@ -105,9 +105,9 @@ public extension NetworkProvider {
  
     - Returns: A reference to a cancellable http request.
      */
-    func queryDepartures(stationId: String, departures: Bool = true, time: Date? = nil, maxDepartures: Int = 0, equivs: Bool = false) async -> (HttpRequest, QueryDeparturesResult) {
+    func queryDepartures(stationId: String, departures: Bool = true, time: Date? = nil, maxDepartures: Int = 0, radius: Int?) async -> (HttpRequest, QueryDeparturesResult) {
         return await withCheckedContinuation { continuation in
-            queryDepartures(stationId: stationId, departures: departures, time: time, maxDepartures: maxDepartures, equivs: equivs) { request, result in
+            queryDepartures(stationId: stationId, departures: departures, time: time, maxDepartures: maxDepartures, radius: radius) { request, result in
                 continuation.resume(with: .success((request, result)))
             }
         }

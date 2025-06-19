@@ -23,13 +23,15 @@ public class Location: NSObject, NSSecureCoding {
     /// Products departing from this station.
     public let products: [Product]?
     
+    public var radius: Double?
+    
     lazy var distanceFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
         numberFormatter.maximumFractionDigits = 2
         return numberFormatter
     }()
     
-    public init?(type: LocationType, id: String?, coord: LocationPoint?, place: String?, name: String?, products: [Product]?) {
+    public init?(type: LocationType, id: String?, coord: LocationPoint?, place: String?, name: String?, products: [Product]?, radius: Double? = nil) {
         if let id = id, id.isEmpty {
             return nil
         }
@@ -50,6 +52,7 @@ public class Location: NSObject, NSSecureCoding {
         self.place = place
         self.name = name
         self.products = products
+        self.radius = radius
     }
     
     public init(id: String) {
@@ -88,36 +91,44 @@ public class Location: NSObject, NSSecureCoding {
     }
     
     required convenience public init?(coder aDecoder: NSCoder) {
-        guard let type = LocationType(rawValue: aDecoder.decodeInteger(forKey: PropertyKey.locationTypeKey)) else {
-            os_log("failed to decode location", log: .default, type: .error)
-            return nil
+            guard let type = LocationType(rawValue: aDecoder.decodeInteger(forKey: PropertyKey.locationTypeKey)) else {
+                os_log("failed to decode location", log: .default, type: .error)
+                return nil
+            }
+            
+            let id = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.locationIdKey) as String?
+            let coord: LocationPoint?
+            if aDecoder.containsValue(forKey: PropertyKey.locationLatKey) && aDecoder.containsValue(forKey: PropertyKey.locationLonKey) {
+                let lat = aDecoder.decodeInteger(forKey: PropertyKey.locationLatKey)
+                let lon = aDecoder.decodeInteger(forKey: PropertyKey.locationLonKey)
+                coord = LocationPoint(lat: lat, lon: lon)
+            } else {
+                coord = nil
+            }
+            let place = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.locationPlaceKey) as String?
+            let name = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.locationNameKey) as String?
+            
+            // NEU: Radius dekodieren
+            let radius: Double? = aDecoder.containsValue(forKey: PropertyKey.radiusKey) ? aDecoder.decodeDouble(forKey: PropertyKey.radiusKey) : nil
+            
+            self.init(type: type, id: id, coord: coord, place: place, name: name, products: nil, radius: radius)
         }
-        
-        let id = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.locationIdKey) as String?
-        let coord: LocationPoint?
-        if aDecoder.containsValue(forKey: PropertyKey.locationLatKey) && aDecoder.containsValue(forKey: PropertyKey.locationLonKey) {
-            let lat = aDecoder.decodeInteger(forKey: PropertyKey.locationLatKey)
-            let lon = aDecoder.decodeInteger(forKey: PropertyKey.locationLonKey)
-            coord = LocationPoint(lat: lat, lon: lon)
-        } else {
-            coord = nil
+
+        public func encode(with aCoder: NSCoder) {
+            aCoder.encode(type.rawValue, forKey: PropertyKey.locationTypeKey)
+            aCoder.encode(id, forKey: PropertyKey.locationIdKey)
+            if let coord = coord {
+                aCoder.encode(coord.lat, forKey: PropertyKey.locationLatKey)
+                aCoder.encode(coord.lon, forKey: PropertyKey.locationLonKey)
+            }
+            aCoder.encode(place, forKey: PropertyKey.locationPlaceKey)
+            aCoder.encode(name, forKey: PropertyKey.locationNameKey)
+            
+            // NEU: Radius kodieren
+            if let radius = radius {
+                aCoder.encode(radius, forKey: PropertyKey.radiusKey)
+            }
         }
-        let place = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.locationPlaceKey) as String?
-        let name = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.locationNameKey) as String?
-        
-        self.init(type: type, id: id, coord: coord, place: place, name: name)
-    }
-    
-    public func encode(with aCoder: NSCoder) {
-        aCoder.encode(type.rawValue, forKey: PropertyKey.locationTypeKey)
-        aCoder.encode(id, forKey: PropertyKey.locationIdKey)
-        if let coord = coord {
-            aCoder.encode(coord.lat, forKey: PropertyKey.locationLatKey)
-            aCoder.encode(coord.lon, forKey: PropertyKey.locationLonKey)
-        }
-        aCoder.encode(place, forKey: PropertyKey.locationPlaceKey)
-        aCoder.encode(name, forKey: PropertyKey.locationNameKey)
-    }
     
     /// Returns true if the coordinate is non-nil.
     public func hasLocation() -> Bool {
@@ -296,7 +307,7 @@ public class Location: NSObject, NSSecureCoding {
         static let locationLonKey = "lon"
         static let locationPlaceKey = "place"
         static let locationNameKey = "name"
-        
+        static let radiusKey = "radius"
     }
     
     

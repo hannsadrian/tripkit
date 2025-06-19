@@ -316,7 +316,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             })
         }
 
-    public override func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, equivs: Bool, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest {
+    public override func queryDepartures(stationId: String, departures: Bool, time: Date?, maxDepartures: Int, radius: Int?, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) -> AsyncRequest {
         
         func performRequest(currentRadius: Int?, isRetry: Bool) -> AsyncRequest {
             let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/stoptimes", encoding: .utf8)
@@ -338,10 +338,10 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             // if let apiKey = apiKey { httpRequest.headers = ["X-API-Key": apiKey] }
             
             return makeRequest(httpRequest, parseHandler: { [weak self] in
-                try self?.queryDeparturesParsing(request: httpRequest, stationId: stationId, departures: departures, time: time, maxDepartures: maxDepartures, equivs: equivs, completion: { request, parsedDepartures in
+                try self?.queryDeparturesParsing(request: httpRequest, stationId: stationId, departures: departures, time: time, maxDepartures: maxDepartures, radius: radius, completion: { request, parsedDepartures in
                     switch parsedDepartures {
                     case .success(departures: let deps):
-                        if !isRetry && !equivs && deps.isEmpty {
+                        if !isRetry && radius == 0 && deps.isEmpty {
                             print("Radius 0 returned no results, trying with radius 1...")
                             // Perform the second request with radius=1
                             // IMPORTANT: We don't call the completion handler here.
@@ -366,8 +366,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         }
         
         // Determine the radius for the *first* request based on `equivs`
-        let initialRadius: Int? = equivs ? nil : 0 // nil means default API behavior, 0 means explicit zero radius
-        return performRequest(currentRadius: initialRadius, isRetry: false)
+        return performRequest(currentRadius: radius, isRetry: false)
     }
 
     public override func queryTrips(from: Location, via: Location?, to: Location, date: Date, departure: Bool, tripOptions: TripOptions, completion: @escaping (HttpRequest, QueryTripsResult) -> Void) -> AsyncRequest {
@@ -625,7 +624,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         }
 
 
-    override func queryDeparturesParsing(request: HttpRequest, stationId: String, departures: Bool, time: Date?, maxDepartures: Int, equivs: Bool, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) throws {
+    override func queryDeparturesParsing(request: HttpRequest, stationId: String, departures: Bool, time: Date?, maxDepartures: Int, radius: Int?, completion: @escaping (HttpRequest, QueryDeparturesResult) -> Void) throws {
         let json = try getResponse(from: request)
 
         // The response contains stopTimes directly under `stopTimes` key.
