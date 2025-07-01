@@ -133,8 +133,9 @@ public class TripOptions: NSObject, NSSecureCoding {
     public var maxFootpathTime: Int? // in minutes
     public var maxFootpathDist: Int? // in meters
     public var tariffProfile: TariffProfile?
+    public var additionalTransferTime: Int?
     
-    public init(products: [Product]? = nil, optimize: Optimize? = nil, walkSpeed: WalkSpeed? = nil, accessibility: Accessibility? = nil, options: [Option]? = nil, maxChanges: Int? = nil, minChangeTime: Int? = nil, maxFootpathTime: Int? = nil, maxFootpathDist: Int? = nil, tariffProfile: TariffProfile? = nil) {
+    public init(products: [Product]? = nil, optimize: Optimize? = nil, walkSpeed: WalkSpeed? = nil, accessibility: Accessibility? = nil, options: [Option]? = nil, maxChanges: Int? = nil, minChangeTime: Int? = nil, maxFootpathTime: Int? = nil, maxFootpathDist: Int? = nil, tariffProfile: TariffProfile? = nil, additionalTransferTime: Int? = 0) {
         self.products = products
         self.optimize = optimize
         self.walkSpeed = walkSpeed
@@ -145,6 +146,7 @@ public class TripOptions: NSObject, NSSecureCoding {
         self.maxFootpathTime = maxFootpathTime
         self.maxFootpathDist = maxFootpathDist
         self.tariffProfile = tariffProfile
+        self.additionalTransferTime = additionalTransferTime
     }
     
     public required convenience init?(coder aDecoder: NSCoder) {
@@ -160,7 +162,8 @@ public class TripOptions: NSObject, NSSecureCoding {
         let maxFootpathTime = aDecoder.decodeObject(of: NSNumber.self, forKey: PropertyKey.maxFootpathTime) as? Int
         let maxFootpathDist = aDecoder.decodeObject(of: NSNumber.self, forKey: PropertyKey.maxFootpathDist) as? Int
         let tariffProfile = aDecoder.decodeObject(of: TariffProfile.self, forKey: PropertyKey.tariffProfile)
-        self.init(products: products, optimize: optimize, walkSpeed: walkSpeed, accessibility: accessibility, options: options, maxChanges: maxChanges, minChangeTime: minChangeTime, maxFootpathTime: maxFootpathTime, maxFootpathDist: maxFootpathDist, tariffProfile: tariffProfile)
+        let additionalTransferTime = aDecoder.decodeObject(of: NSNumber.self, forKey: PropertyKey.additionalTransferTime) as? Int
+        self.init(products: products, optimize: optimize, walkSpeed: walkSpeed, accessibility: accessibility, options: options, maxChanges: maxChanges, minChangeTime: minChangeTime, maxFootpathTime: maxFootpathTime, maxFootpathDist: maxFootpathDist, tariffProfile: tariffProfile, additionalTransferTime: additionalTransferTime)
     }
     
     public func encode(with aCoder: NSCoder) {
@@ -176,6 +179,7 @@ public class TripOptions: NSObject, NSSecureCoding {
         aCoder.encode(maxFootpathTime, forKey: PropertyKey.maxFootpathTime)
         aCoder.encode(maxFootpathDist, forKey: PropertyKey.maxFootpathDist)
         aCoder.encode(tariffProfile, forKey: PropertyKey.tariffProfile)
+        aCoder.encode(additionalTransferTime, forKey: PropertyKey.additionalTransferTime)
     }
     
     struct PropertyKey {
@@ -189,6 +193,7 @@ public class TripOptions: NSObject, NSSecureCoding {
         static let maxFootpathTime = "maxFootpathTime"
         static let maxFootpathDist = "maxFootpathDist"
         static let tariffProfile = "tariffProfile"
+        static let additionalTransferTime = "additionalTransferTime"
     }
 }
 

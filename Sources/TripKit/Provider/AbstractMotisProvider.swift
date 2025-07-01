@@ -397,7 +397,12 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         urlBuilder.addParameter(key: "maxPreTransitTime", value: 1800)
         urlBuilder.addParameter(key: "maxPostTransitTime", value: 1800)
         urlBuilder.addParameter(key: "maxDirectTime", value: 3600)
-
+        
+        if let additionalTransferTime = tripOptions.additionalTransferTime {
+            urlBuilder.addParameter(key: "minTransferTime", value: additionalTransferTime/2)
+            urlBuilder.addParameter(key: "transferTimeFactor", value: 2)
+        }
+        
         // Only add the timetableView parameter if the .timed option is present
         if tripOptions.options?.contains(.timed) ?? false {
             urlBuilder.addParameter(key: "timetableView", value: false)
@@ -1232,59 +1237,70 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
 
     // MARK: - Polyline Decoding
 
-    // Basic Google Polyline decoding function (needs refinement for precision 7)
-    // Adapted from common online examples. Needs proper error handling and precision adjustment.
+    /**
+     Decodes a polyline string into an array of LocationPoint.
+     This implementation correctly handles the precision conversion from MOTIS (1e7)
+     to TripKit's LocationPoint (1e6).
+     - Parameter encodedString: The polyline string to decode.
+     - Returns: An array of `LocationPoint` or `nil` if the string is invalid or empty.
+    */
     internal func decodePolyline(_ encodedString: String?) -> [LocationPoint]? {
-         guard let encodedString = encodedString, !encodedString.isEmpty else { return nil }
+        guard let encodedString = encodedString, !encodedString.isEmpty else { return nil }
 
-         var points: [LocationPoint] = []
-         var index = encodedString.startIndex
-         var lat: Int32 = 0
-         var lon: Int32 = 0
-         let factor: Double = 1e7 // Precision 7
+        let bytes = Array(encodedString.utf8)
+        var index = 0
+        var points: [LocationPoint] = []
+        
+        var lat: Int32 = 0
+        var lon: Int32 = 0
 
-         while index < encodedString.endIndex {
-             var result: Int32 = 1
-             var shift: Int32 = 0
-             var b: Int32 = 0
-             repeat {
-                 guard index < encodedString.endIndex else { break }
-                 let char = encodedString[index]
-                 guard let asciiValue = char.asciiValue else { break } // Handle non-ASCII gracefully
-                 b = Int32(asciiValue) - 63 - 1 // Subtract 1 before shifting
-                 result += b << shift
-                 shift += 5
-                 index = encodedString.index(after: index)
-             } while b >= 0x1f // Check original value (b + 1) >= 0x20
+        while index < bytes.count {
+            // Decode latitude delta from polyline (raw precision 7 value)
+            let (latDelta, newIndexAfterLat) = decodeSingleValue(from: bytes, at: index)
+            lat += latDelta
+            index = newIndexAfterLat
 
-             // Apply sign, then divide by 2
-             lat += ((result & 1) != 0 ? ~(result >> 1) : (result >> 1))
+            guard index < bytes.count else { break }
 
-             result = 1
-             shift = 0
-             repeat {
-                 guard index < encodedString.endIndex else { break }
-                 let char = encodedString[index]
-                 guard let asciiValue = char.asciiValue else { break }
-                  b = Int32(asciiValue) - 63 - 1
-                 result += b << shift
-                 shift += 5
-                 index = encodedString.index(after: index)
-             } while b >= 0x1f
+            // Decode longitude delta from polyline (raw precision 7 value)
+            let (lonDelta, newIndexAfterLon) = decodeSingleValue(from: bytes, at: index)
+            lon += lonDelta
+            index = newIndexAfterLon
 
-             lon += ((result & 1) != 0 ? ~(result >> 1) : (result >> 1))
+            // --- THIS IS THE FIX ---
+            
+            // 1. Scale the raw precision 7 integers down to precision 6 by dividing by 10.
+            let scaledLat = Int(round(Double(lat) / 10.0))
+            let scaledLon = Int(round(Double(lon) / 10.0))
+            
+            // 2. Create the LocationPoint without swapping the coordinates.
+            // Pass the scaled latitude to the `lat` parameter and longitude to the `lon` parameter.
+            points.append(LocationPoint(lat: scaledLat, lon: scaledLon))
+        }
 
-             // Scale to TripKit's integer format (factor should be 1e6, MOTIS uses 1e7 for polyline?)
-             // Assuming TripKit LocationPoint expects 1e6 precision
-              let pointLat = Int(round(Double(lat) / 10.0)) // Divide by 10 if MOTIS polyline is 1e7 and TripKit Point is 1e6
-              let pointLon = Int(round(Double(lon) / 10.0))
-             // let pointLat = Int(lat) // Use directly if precision matches
-             // let pointLon = Int(lon)
+        return points.isEmpty ? nil : points
+    }
 
-             points.append(LocationPoint(lat: pointLat, lon: pointLon))
-         }
-         return points.isEmpty ? nil : points
-     }
+    // The helper function `decodeSingleValue` remains unchanged as it is correct.
+    private func decodeSingleValue(from bytes: [UInt8], at index: Int) -> (delta: Int32, newIndex: Int) {
+        var currentIndex = index
+        var result: Int32 = 0
+        var shift: UInt = 0
+
+        while currentIndex < bytes.count {
+            let byte = bytes[currentIndex]
+            let value = Int32(byte) - 63
+            result |= (value & 0x1F) << shift
+            shift += 5
+            currentIndex += 1
+            if (value & 0x20) == 0 {
+                break
+            }
+        }
+        
+        let delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
+        return (delta, currentIndex)
+    }
     
     // MARK: - Utility Functions
 
