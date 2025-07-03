@@ -15,6 +15,10 @@
 		3A1325952DBA5128007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325932DBA5122007C71AF /* secrets.json */; };
 		3A1325962DBA5128007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325932DBA5122007C71AF /* secrets.json */; };
 		3A1325972DBA5128007C71AF /* secrets.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A1325932DBA5122007C71AF /* secrets.json */; };
+		3A5309B22E1580A8009212EF /* Polyline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5309B12E1580A6009212EF /* Polyline.swift */; };
+		3A5309B32E1580A8009212EF /* Polyline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5309B12E1580A6009212EF /* Polyline.swift */; };
+		3A5309B42E1580A8009212EF /* Polyline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5309B12E1580A6009212EF /* Polyline.swift */; };
+		3A5309B52E1580A8009212EF /* Polyline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5309B12E1580A6009212EF /* Polyline.swift */; };
 		FA0B56F727883198003E5A65 /* VvtProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B56F627883198003E5A65 /* VvtProviderTests.swift */; };
 		FA0B56F827883198003E5A65 /* VvtProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B56F627883198003E5A65 /* VvtProviderTests.swift */; };
 		FA0B56F927883198003E5A65 /* VvtProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B56F627883198003E5A65 /* VvtProviderTests.swift */; };
@@ -740,6 +744,7 @@
 		2DBA1839F0E561F0397EB1F1 /* UrlEncodingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlEncodingTests.swift; sourceTree = "<group>"; };
 		3A1325892DB95309007C71AF /* AbstractMotisProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractMotisProvider.swift; sourceTree = "<group>"; };
 		3A1325932DBA5122007C71AF /* secrets.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = secrets.json; sourceTree = "<group>"; };
+		3A5309B12E1580A6009212EF /* Polyline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Polyline.swift; sourceTree = "<group>"; };
 		FA0B56F627883198003E5A65 /* VvtProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VvtProviderTests.swift; sourceTree = "<group>"; };
 		FA0B56FA278831C1003E5A65 /* VvtProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VvtProviderTests.swift; sourceTree = "<group>"; };
 		FA0B5703278848B4003E5A65 /* VorProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VorProviderTests.swift; sourceTree = "<group>"; };
@@ -1374,6 +1379,7 @@
 		FAD426E71F12B92C003F14D0 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				3A5309B12E1580A6009212EF /* Polyline.swift */,
 				FA1C85771E437D73002BFE6E /* AsyncRequest.swift */,
 				FA11F6E420496C7100B66359 /* UrlBuilder.swift */,
 				FAB7543F1E3FD49D00C343F2 /* HttpClient.swift */,
@@ -1961,6 +1967,7 @@
 				FA5CD2C224FBB2A900B4990A /* CryptoUtils.swift in Sources */,
 				FAE0E6452B3AD28A009CC567 /* QueryWagonSequenceResult.swift in Sources */,
 				FA5CD2BD24FBB2A900B4990A /* AsyncRequest.swift in Sources */,
+				3A5309B32E1580A8009212EF /* Polyline.swift in Sources */,
 				FA5CD29F24FBB29C00B4990A /* ServingLine.swift in Sources */,
 				FA5CD2A624FBB29C00B4990A /* Location.swift in Sources */,
 				FA5CD29324FBB29800B4990A /* SuggestLocationsResult.swift in Sources */,
@@ -2015,6 +2022,7 @@
 				FA5CD2CF24FBB2AA00B4990A /* CryptoUtils.swift in Sources */,
 				FAE0E6462B3AD28A009CC567 /* QueryWagonSequenceResult.swift in Sources */,
 				FA5CD2CA24FBB2AA00B4990A /* AsyncRequest.swift in Sources */,
+				3A5309B52E1580A8009212EF /* Polyline.swift in Sources */,
 				FA5CD2AF24FBB29D00B4990A /* ServingLine.swift in Sources */,
 				FA5CD2B624FBB29D00B4990A /* Location.swift in Sources */,
 				FA5CD29824FBB29900B4990A /* SuggestLocationsResult.swift in Sources */,
@@ -2195,6 +2203,7 @@
 				FA63D93F1E4D11BB00EF0540 /* ServingLine.swift in Sources */,
 				FA9D377B2266476100CED39F /* Logging.swift in Sources */,
 				FAE0E6432B3AD28A009CC567 /* QueryWagonSequenceResult.swift in Sources */,
+				3A5309B42E1580A8009212EF /* Polyline.swift in Sources */,
 				FAB754271E3FD3E500C343F2 /* Departure.swift in Sources */,
 				FAB754321E3FD3E500C343F2 /* Stop.swift in Sources */,
 				FAA569441E7415DC006EB901 /* Fare.swift in Sources */,
@@ -2528,6 +2537,7 @@
 				FAFF18971FA50B9500A8ED69 /* ServingLine.swift in Sources */,
 				FA9D377C2266476100CED39F /* Logging.swift in Sources */,
 				FAE0E6442B3AD28A009CC567 /* QueryWagonSequenceResult.swift in Sources */,
+				3A5309B22E1580A8009212EF /* Polyline.swift in Sources */,
 				FAFF189A1FA50B9500A8ED69 /* Departure.swift in Sources */,
 				FAFF189C1FA50B9500A8ED69 /* Stop.swift in Sources */,
 				FAFF189D1FA50B9500A8ED69 /* Fare.swift in Sources */,

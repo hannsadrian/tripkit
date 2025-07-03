@@ -6,7 +6,7 @@ import SWXMLHash
 public class HttpClient: NSObject {
     
     private static var shared = HttpClient()
-    private static let DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/602.4.8 (KHTML, like Gecko) Version/10.0.3 Safari/602.4.8"
+    private static let DefaultUserAgent = "Transportflow iOS"
     
     private lazy var urlSession: URLSession = {
         let config = URLSessionConfiguration.default

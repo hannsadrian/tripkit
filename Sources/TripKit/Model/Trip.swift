@@ -152,8 +152,8 @@ public class Trip: NSObject, NSSecureCoding {
             result += "\(leg.departure.getUniqueLongName())-"
             result += "\(leg.arrival.getUniqueLongName())-"
             
-            if let _ = leg as? IndividualLeg {
-                result += "Individual"
+            if let leg = leg as? IndividualLeg {
+                result += "Individual" + String(leg.min)
             } else if let leg = leg as? PublicLeg {
                 result += "\(leg.departureStop.plannedTime.timeIntervalSince1970)-"
                 result += "\(leg.arrivalStop.plannedTime.timeIntervalSince1970)-"

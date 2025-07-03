@@ -2,7 +2,9 @@ import Foundation
 
 /// Type of a means of transport
 public enum Product: String, CaseIterable {
+    case airplane = "A"
     
+    case coach = "X"
     /// ICE, IC
     case highSpeedTrain = "I"
     /// RE, RB
@@ -21,9 +23,17 @@ public enum Product: String, CaseIterable {
     case ferry = "F"
     /// Train to mountain
     case cablecar = "C"
+    
+    case funicular = "D"
+    
+    case arealLift = "E"
 
     public var id: String {
         switch self {
+        case .airplane:
+            return "airplane"
+        case .coach:
+            return "coach"
         case .highSpeedTrain:
             return "high_speed_train"
         case .regionalTrain:
@@ -42,6 +52,10 @@ public enum Product: String, CaseIterable {
             return "cablecar"
         case .onDemand:
             return "on_demand"
+        case .funicular:
+            return "funicular"
+        case .arealLift:
+            return "areal_lift"
         }
     }
     

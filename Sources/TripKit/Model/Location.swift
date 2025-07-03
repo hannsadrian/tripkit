@@ -25,13 +25,15 @@ public class Location: NSObject, NSSecureCoding {
     
     public var radius: Double?
     
+    public var subtitle: String?
+    
     lazy var distanceFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
         numberFormatter.maximumFractionDigits = 2
         return numberFormatter
     }()
     
-    public init?(type: LocationType, id: String?, coord: LocationPoint?, place: String?, name: String?, products: [Product]?, radius: Double? = nil) {
+    public init?(type: LocationType, id: String?, coord: LocationPoint?, place: String?, name: String?, products: [Product]?, radius: Double? = nil, subtitle: String? = nil) {
         if let id = id, id.isEmpty {
             return nil
         }
@@ -53,6 +55,7 @@ public class Location: NSObject, NSSecureCoding {
         self.name = name
         self.products = products
         self.radius = radius
+        self.subtitle = subtitle
     }
     
     public init(id: String) {
@@ -62,6 +65,7 @@ public class Location: NSObject, NSSecureCoding {
         self.place = nil
         self.name = nil
         self.products = nil
+        self.subtitle = nil
     }
     
     public init(anyName: String?) {
@@ -83,7 +87,7 @@ public class Location: NSObject, NSSecureCoding {
     }
     
     convenience public init?(type: LocationType, id: String?, coord: LocationPoint?, place: String?, name: String?) {
-        self.init(type: type, id: id, coord: coord, place: place, name: name, products: nil)
+        self.init(type: type, id: id, coord: coord, place: place, name: name, products: nil, subtitle: nil)
     }
     
     convenience public init?(type: LocationType, id: String) {
@@ -110,8 +114,9 @@ public class Location: NSObject, NSSecureCoding {
             
             // NEU: Radius dekodieren
             let radius: Double? = aDecoder.containsValue(forKey: PropertyKey.radiusKey) ? aDecoder.decodeDouble(forKey: PropertyKey.radiusKey) : nil
+        let subtitle: String? = aDecoder.decodeObject(of: NSString.self, forKey: PropertyKey.subtitleKey) as String?
             
-            self.init(type: type, id: id, coord: coord, place: place, name: name, products: nil, radius: radius)
+            self.init(type: type, id: id, coord: coord, place: place, name: name, products: nil, radius: radius, subtitle: subtitle)
         }
 
         public func encode(with aCoder: NSCoder) {
@@ -127,6 +132,10 @@ public class Location: NSObject, NSSecureCoding {
             // NEU: Radius kodieren
             if let radius = radius {
                 aCoder.encode(radius, forKey: PropertyKey.radiusKey)
+            }
+            
+            if let subtitle = subtitle {
+                aCoder.encode(subtitle, forKey: PropertyKey.subtitleKey)
             }
         }
     
@@ -145,9 +154,7 @@ public class Location: NSObject, NSSecureCoding {
     /// Locations with names like "Hbf" or "station" are not unambiguous, that's why the place is appended to the name in this case.
     /// If no name or place is specified for this location, the id, coordinate or type is returned instead.
     public func getUniqueShortName() -> String {
-        if let place = self.place, !place.isEmpty, let name = self.name, !name.contains(place) && (Location.NON_UNIQUE_NAMES.contains(name) || name.split(separator: " ").first(where: {Location.NON_UNIQUE_NAMES.contains(String($0))}) != nil || name.split(separator: ",").first(where: {Location.NON_UNIQUE_NAMES.contains(String($0))}) != nil) {
-            return place + ", " + name
-        } else if let name = self.name {
+        if let name = self.name {
             return name
         } else if let id = self.id, id != "" {
             return id
@@ -159,7 +166,7 @@ public class Location: NSObject, NSSecureCoding {
     }
     
     /// Returns the name and place of this location, if available. Otherwise, the coordinate or location type is returned.
-    public func getUniqueLongName() -> String {
+    public func getUniqueLongName(withoutId: Bool = false) -> String {
         var result = ""
         if let name = name {
             result += name
@@ -176,6 +183,11 @@ public class Location: NSObject, NSSecureCoding {
             } else {
                 result = type.displayName
             }
+        }
+        if let radius = radius, radius > 1 {
+            result += "\(radius)"
+        } else if !withoutId {
+            result += "\(id)"
         }
         return result
     }
@@ -308,6 +320,7 @@ public class Location: NSObject, NSSecureCoding {
         static let locationPlaceKey = "place"
         static let locationNameKey = "name"
         static let radiusKey = "radius"
+        static let subtitleKey = "subtitle"
     }
     
     

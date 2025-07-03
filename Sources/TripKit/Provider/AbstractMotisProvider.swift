@@ -207,10 +207,13 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         guard let products = products, !products.isEmpty else {
              return ["TRANSIT"] // Default MOTIS behavior if nothing specified
         }
+        // AIRPLANE,HIGHSPEED_RAIL,LONG_DISTANCE,NIGHT_RAIL,COACH,REGIONAL_FAST_RAIL,REGIONAL_RAIL,METRO,SUBWAY,TRAM,BUS,FERRY,OTHER
         // MOTIS uses specific strings. Map TripKit Product enums.
         let modeStrings = products.compactMap { product -> String? in
             switch product {
-            case .highSpeedTrain: return "HIGHSPEED_RAIL" // Or maybe "RAIL" or specific types
+            case .airplane: return "AIRPLANE"
+            case .coach: return "COACH"
+            case .highSpeedTrain: return "HIGHSPEED_RAIL,LONG_DISTANCE,NIGHT_RAIL" // Or maybe "RAIL" or specific types
             case .regionalTrain: return "REGIONAL_RAIL,REGIONAL_FAST_RAIL" // Or maybe "RAIL"
             case .suburbanTrain: return "METRO" // MOTIS seems to group S-Bahn under regional
             case .subway: return "SUBWAY"
@@ -218,7 +221,9 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             case .bus: return "BUS" // Excludes COACH
             case .ferry: return "FERRY"
             case .onDemand: return "ODM" // MOTIS might have 'ODM' or specific rental modes
-            case .cablecar: return "OTHER" // Or specific if MOTIS supports it
+            case .cablecar: return "CABLE_CAR,FUNICULAR,AREAL_LIFT" // Or specific if MOTIS supports it
+            case .funicular: return "CABLE_CAR,FUNICULAR,AREAL_LIFT"
+            case .arealLift: return "CABLE_CAR,FUNICULAR,AREAL_LIFT"
             // Add mappings for other MOTIS modes if needed (AIRPLANE, COACH, METRO, etc.)
             }
         }
@@ -328,7 +333,8 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             }
             
             if let radius = currentRadius {
-                 urlBuilder.addParameter(key: "radius", value: radius)
+                urlBuilder.addParameter(key: "radius", value: max(1, radius))
+                urlBuilder.addParameter(key: "exactRadius", value: true)
             }
             // Optional: Filter by mode?
             // urlBuilder.addParameter(key: "mode", value: ["BUS", "TRAM"].joined(separator: ","))
@@ -377,8 +383,8 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
 
     // This is the new internal implementation that supports retries.
     // The pagination-based queryTrips method remains unchanged.
-    private func queryTrips(from: Location, via: Location?, to: Location, date: Date, departure: Bool, tripOptions: TripOptions, isRetry: Bool, completion: @escaping (HttpRequest, QueryTripsResult) -> Void) -> AsyncRequest {
-        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/plan", encoding: .utf8)
+    private func queryTrips(from: Location, via: Location?, to: Location, date: Date, departure: Bool, tripOptions: TripOptions, isRetry: Bool, version: Int? = nil, completion: @escaping (HttpRequest, QueryTripsResult) -> Void) -> AsyncRequest {
+        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v\(String(version ?? 3))/plan", encoding: .utf8)
 
         guard let fromPlace = formatLocationForQuery(from) else {
             completion(HttpRequest(urlBuilder: urlBuilder), .unknownFrom)
@@ -397,6 +403,8 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         urlBuilder.addParameter(key: "maxPreTransitTime", value: 1800)
         urlBuilder.addParameter(key: "maxPostTransitTime", value: 1800)
         urlBuilder.addParameter(key: "maxDirectTime", value: 3600)
+        urlBuilder.addParameter(key: "maxMatchingDistance", value: 250)
+        urlBuilder.addParameter(key: "numItineraries", value: 3)
         
         if let additionalTransferTime = tripOptions.additionalTransferTime {
             urlBuilder.addParameter(key: "minTransferTime", value: additionalTransferTime/2)
@@ -419,6 +427,10 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         }
 
         if var modes = formatModesForQuery(tripOptions.products) {
+            if version ?? 1 < 3 {
+                modes.removeAll { $0 == "CABLE_CAR,FUNICULAR,AREAL_LIFT" }
+            }
+            
             if tripOptions.options?.contains(.bike) ?? false {
                 modes.append("BIKE")
             }
@@ -449,6 +461,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             urlBuilder.addParameter(key: "directModes", value: "BIKE,WALK")
             urlBuilder.removeParameter(key: "maxDirectTime")
             urlBuilder.addParameter(key: "maxDirectTime", value: 14400)
+            urlBuilder.removeParameter(key: "timetableView")
         }
         if tripOptions.options?.contains(.rental) ?? false {
             urlBuilder.addParameter(key: "preTransitModes", value: "RENTAL,WALK")
@@ -456,6 +469,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             urlBuilder.addParameter(key: "directModes", value: "RENTAL,WALK")
             urlBuilder.removeParameter(key: "maxDirectTime")
             urlBuilder.addParameter(key: "maxDirectTime", value: 14400)
+            urlBuilder.removeParameter(key: "timetableView")
         }
          
 
@@ -488,6 +502,12 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
                 // --- END: RETRY LOGIC ---
             })
         }, errorHandler: { error in
+            if case HttpError.invalidStatusCode(let code, _) = error, code == 404, version ?? 3 > 2 {
+                print("GOT 404 for version \(String(describing: version))")
+                _ = self.queryTrips(from: from, via: via, to: to, date: date, departure: departure, tripOptions: tripOptions, isRetry: true, version: 2, completion: completion)
+                return
+            }
+            
             if case HttpError.invalidStatusCode(let code, _) = error, code == 400 {
                 completion(httpRequest, .failure(ParseError(reason: "Bad Request - check input parameters (\(code))")))
                 return
@@ -563,7 +583,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             return AsyncRequest(task: nil)
         }
 
-        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/trip", encoding: .utf8)
+        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v2/trip", encoding: .utf8)
         urlBuilder.addParameter(key: "tripId", value: motisContext.tripId)
 
         let httpRequest = HttpRequest(urlBuilder: urlBuilder)
@@ -583,7 +603,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
             return AsyncRequest(task: nil)
         }
 
-        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/trip", encoding: .utf8)
+        let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v2/trip", encoding: .utf8)
         urlBuilder.addParameter(key: "tripId", value: motisContext.tripId)
 
         let httpRequest = HttpRequest(urlBuilder: urlBuilder)
@@ -919,7 +939,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
              return nil
          }
 
-         let path = decodePolyline(json["legGeometry"]["points"].string) ?? []
+        let path = decodePolylineToLocationPoint(json["legGeometry"]["points"].string, precision: pow(10,json["legGeometry"]["precision"].number as? Double ?? 6)) ?? []
          let message = json["message"].string // Not standard in MOTIS Leg, but check just in case
 
          // Differentiate between Public and Individual Leg based on mode
@@ -1078,22 +1098,18 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         }
         
         var place: String? = nil
-        if type == .station && id != nil {
-            var splits = id!.split(separator: ":")
-            if splits.count > 2 {
-                place = String(splits.last ?? "")
-            }
-        }
         if let track = json["track"].string ?? json["scheduledTrack"].string {
             place = track
         }
         if place?.isEmpty ?? false {
             place = nil
         }
+        
+        let description = json["description"].string
 
          // MOTIS Place doesn't distinguish between 'place' (city) and 'name' (station/street) well.
          // Use the single 'name' field for TripKit's 'name'. 'place' remains nil unless we can infer it.
-         return Location(type: type, id: id, coord: coord, place: place, name: name)
+        return Location(type: type, id: id, coord: coord, place: place, name: name, products: nil, radius: nil, subtitle: description)
     }
 
      internal func parseLocation(fromMatch json: JSON) -> Location? {
@@ -1198,8 +1214,8 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
          case "RAIL", "REGIONAL_RAIL", "REGIONAL_FAST_RAIL": return .regionalTrain // Group various rail types?
          case "HIGHSPEED_RAIL", "LONG_DISTANCE": return .highSpeedTrain
          case "NIGHT_RAIL": return .highSpeedTrain // Group night trains with high speed? Or regional?
-         case "COACH": return .bus // Group long distance coach with bus?
-         case "AIRPLANE": return nil // TripKit doesn't have an airplane product
+         case "COACH": return .coach // Group long distance coach with bus?
+         case "AIRPLANE": return .airplane // TripKit doesn't have an airplane product
 
          // Street types (return nil as they are handled by IndividualLeg)
          case "WALK", "BIKE", "CAR", "RENTAL", "CAR_PARKING", "ODM": return nil
@@ -1207,6 +1223,9 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
          // Special types
          case "TRANSIT": return nil // Represents 'all', not a specific product
          case "OTHER": return nil // Map 'OTHER' if necessary, e.g., to .cablecar?
+         case "CABLE_CAR": return .cablecar
+         case "FUNICULAR": return .funicular
+         case"AREAL_LIFT": return .arealLift
 
          default:
              os_log("Unknown MOTIS mode string encountered: %@", log: .requestLogger, type: .info, modeStr)
@@ -1238,68 +1257,38 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
     // MARK: - Polyline Decoding
 
     /**
-     Decodes a polyline string into an array of LocationPoint.
-     This implementation correctly handles the precision conversion from MOTIS (1e7)
-     to TripKit's LocationPoint (1e6).
+     Decodes a polyline string directly into an array of `LocationPoint` objects.
+     
+     This function serves as a compatible bridge between the Polyline library (which works with `CLLocationCoordinate2D`)
+     and the custom `LocationPoint` class (which uses integer-based coordinates).
+
+     - It assumes the polyline was encoded with a precision of 1e6 (1,000,000), which matches the definition of `LocationPoint`.
+     - It leverages the provided Polyline library to handle the core decoding algorithm.
+     
      - Parameter encodedString: The polyline string to decode.
-     - Returns: An array of `LocationPoint` or `nil` if the string is invalid or empty.
+     - Returns: An array of `LocationPoint` objects, or `nil` if the string is invalid or empty.
     */
-    internal func decodePolyline(_ encodedString: String?) -> [LocationPoint]? {
-        guard let encodedString = encodedString, !encodedString.isEmpty else { return nil }
-
-        let bytes = Array(encodedString.utf8)
-        var index = 0
-        var points: [LocationPoint] = []
-        
-        var lat: Int32 = 0
-        var lon: Int32 = 0
-
-        while index < bytes.count {
-            // Decode latitude delta from polyline (raw precision 7 value)
-            let (latDelta, newIndexAfterLat) = decodeSingleValue(from: bytes, at: index)
-            lat += latDelta
-            index = newIndexAfterLat
-
-            guard index < bytes.count else { break }
-
-            // Decode longitude delta from polyline (raw precision 7 value)
-            let (lonDelta, newIndexAfterLon) = decodeSingleValue(from: bytes, at: index)
-            lon += lonDelta
-            index = newIndexAfterLon
-
-            // --- THIS IS THE FIX ---
-            
-            // 1. Scale the raw precision 7 integers down to precision 6 by dividing by 10.
-            let scaledLat = Int(round(Double(lat) / 10.0))
-            let scaledLon = Int(round(Double(lon) / 10.0))
-            
-            // 2. Create the LocationPoint without swapping the coordinates.
-            // Pass the scaled latitude to the `lat` parameter and longitude to the `lon` parameter.
-            points.append(LocationPoint(lat: scaledLat, lon: scaledLon))
-        }
-
-        return points.isEmpty ? nil : points
-    }
-
-    // The helper function `decodeSingleValue` remains unchanged as it is correct.
-    private func decodeSingleValue(from bytes: [UInt8], at index: Int) -> (delta: Int32, newIndex: Int) {
-        var currentIndex = index
-        var result: Int32 = 0
-        var shift: UInt = 0
-
-        while currentIndex < bytes.count {
-            let byte = bytes[currentIndex]
-            let value = Int32(byte) - 63
-            result |= (value & 0x1F) << shift
-            shift += 5
-            currentIndex += 1
-            if (value & 0x20) == 0 {
-                break
-            }
+    internal func decodePolylineToLocationPoint(_ encodedString: String?, precision: Double = 1_000_000.0) -> [LocationPoint]? {
+        guard let encodedString = encodedString, !encodedString.isEmpty else {
+            return nil
         }
         
-        let delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
-        return (delta, currentIndex)
+        guard let coordinates: [CLLocationCoordinate2D] = decodePolyline(encodedString, precision: precision) else {
+            // If the library's decoder fails, we propagate the failure.
+            return nil
+        }
+        
+        let locationPoints = coordinates.map { coordinate -> LocationPoint in
+            // The library's decoder returns a Double (e.g., 52.521234).
+            // To get the integer representation required by `LocationPoint`,
+            // we multiply by the precision factor and round to the nearest integer.
+            let latInt = Int(round(coordinate.latitude * 1_000_000))
+            let lonInt = Int(round(coordinate.longitude * 1_000_000))
+            
+            return LocationPoint(lat: latInt, lon: lonInt)
+        }
+
+        return locationPoints.isEmpty ? nil : locationPoints
     }
     
     // MARK: - Utility Functions
