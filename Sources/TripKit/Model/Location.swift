@@ -25,6 +25,8 @@ public class Location: NSObject, NSSecureCoding {
     
     public var radius: Double?
     
+    public var groupNumber: Int = 0
+    
     public var subtitle: String?
     
     lazy var distanceFormatter: NumberFormatter = {

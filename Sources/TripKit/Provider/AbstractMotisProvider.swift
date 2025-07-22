@@ -407,8 +407,8 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         urlBuilder.addParameter(key: "numItineraries", value: 3)
         
         if let additionalTransferTime = tripOptions.additionalTransferTime {
-            urlBuilder.addParameter(key: "minTransferTime", value: additionalTransferTime/2)
-            urlBuilder.addParameter(key: "transferTimeFactor", value: 2)
+            urlBuilder.addParameter(key: "minTransferTime", value: additionalTransferTime)
+            //urlBuilder.addParameter(key: "transferTimeFactor", value: 2)
         }
         
         // Only add the timetableView parameter if the .timed option is present
