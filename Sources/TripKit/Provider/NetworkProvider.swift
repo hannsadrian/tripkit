@@ -36,7 +36,7 @@ public protocol NetworkProvider {
 
     - Returns: A reference to a cancellable http request.
      */
-    @discardableResult func suggestLocations(constraint: String, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) -> AsyncRequest
+    @discardableResult func suggestLocations(constraint: String, locationBias: Location?, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) -> AsyncRequest
     
     /**
     Find locations near to given location. At least one of lat/lon pair or station id must be present in that location.

@@ -243,7 +243,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
 
     // --- API Call Implementations ---
 
-    public override func suggestLocations(constraint: String, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) -> AsyncRequest {
+    public override func suggestLocations(constraint: String, locationBias: Location?, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) -> AsyncRequest {
         let urlBuilder = UrlBuilder(path: apiBaseUrl + "/api/v1/geocode", encoding: .utf8)
         urlBuilder.addParameter(key: "text", value: constraint)
         urlBuilder.addParameter(key: "language", value: queryLanguage ?? defaultLanguage)
@@ -270,6 +270,13 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
         }
          // maxLocations is not directly supported by MOTIS /geocode. The API returns its own ranked list.
 
+        if let bias = locationBias, let biasCoord = bias.coord {
+            let lat = String(format: "%.3f", Double(biasCoord.lat)/1000000.0)
+            let lon = String(format: "%.3f", Double(biasCoord.lon)/1000000.0)
+            urlBuilder.addParameter(key: "place", value: "\(lat),\(lon)")
+            urlBuilder.addParameter(key: "placeBias", value: 2)
+        }
+        
         let httpRequest = HttpRequest(urlBuilder: urlBuilder)
         // Add API Key header if necessary
         // if let apiKey = apiKey { httpRequest.headers = ["X-API-Key": apiKey] }
@@ -629,23 +636,11 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
     override func suggestLocationsParsing(request: HttpRequest, constraint: String, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) throws {
         let json = try getResponse(from: request)
         var suggestions: [SuggestedLocation] = []
-
-        let motisTypes = types?.compactMap { type -> String? in
-            switch type {
-            case .station: return "STOP"
-            case .poi: return "PLACE"
-            case .address: return "ADDRESS"
-            case .coord, .any: return nil // COORD not directly supported, ANY is implicit
-            }
-        }
         
         for item in json.arrayValue {
             if let location = parseLocation(fromMatch: item) {
                 let priority = item["score"].intValue // Use MOTIS score as priority
                 
-                if motisTypes != nil && !motisTypes!.contains(where: { $0 == item["type"].stringValue }) {
-                    continue
-                }
                 suggestions.append(SuggestedLocation(location: location, priority: priority))
             }
         }
@@ -1123,7 +1118,7 @@ public class AbstractMotisProvider: AbstractNetworkProvider {
              return nil
          }
 
-         let id = json["id"].string // Use ID from match
+         var id = json["id"].string // Use ID from match
 
          let type: LocationType
          switch typeStr.uppercased() {

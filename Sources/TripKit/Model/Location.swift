@@ -36,9 +36,6 @@ public class Location: NSObject, NSSecureCoding {
     }()
     
     public init?(type: LocationType, id: String?, coord: LocationPoint?, place: String?, name: String?, products: [Product]?, radius: Double? = nil, subtitle: String? = nil) {
-        if let id = id, id.isEmpty {
-            return nil
-        }
         if let _ = place, name == nil {
             return nil
         }

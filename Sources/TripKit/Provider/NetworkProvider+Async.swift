@@ -12,9 +12,9 @@ public extension NetworkProvider {
 
     - Returns: A reference to a cancellable http request.
      */
-    func suggestLocations(constraint: String, types: [LocationType]? = nil, maxLocations: Int = 0) async -> (HttpRequest, SuggestLocationsResult) {
+    func suggestLocations(constraint: String, locationBias: Location?, types: [LocationType]? = nil, maxLocations: Int = 0) async -> (HttpRequest, SuggestLocationsResult) {
         return await withCheckedContinuation { continuation in
-            suggestLocations(constraint: constraint, types: types, maxLocations: maxLocations) { request, result in
+            suggestLocations(constraint: constraint, locationBias: locationBias, types: types, maxLocations: maxLocations) { request, result in
                 continuation.resume(with: .success((request, result)))
             }
         }

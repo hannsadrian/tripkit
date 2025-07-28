@@ -44,7 +44,7 @@ public class AbstractNetworkProvider: NetworkProvider {
     
     // MARK: API methods
     
-    public func suggestLocations(constraint: String, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) -> AsyncRequest {
+    public func suggestLocations(constraint: String, locationBias: Location?, types: [LocationType]?, maxLocations: Int, completion: @escaping (HttpRequest, SuggestLocationsResult) -> Void) -> AsyncRequest {
         fatalError("\(#function) not implemented")
     }
     
